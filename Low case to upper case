@@ -1,0 +1,29 @@
+#include <stdio.h>
+
+// recursive function to convert lowercase to uppercase
+void toUpperCase(char str[], int index) {
+    // base case: end of string
+    if (str[index] == '\0')
+        return;
+
+    // if lowercase, convert to uppercase
+    if (str[index] >= 'a' && str[index] <= 'z') {
+        str[index] = str[index] - 32;
+    }
+
+    // recursive call for next character
+    toUpperCase(str, index + 1);
+}
+
+int main() {
+    char str[100];
+
+    printf("Enter a string: ");
+    fgets(str, sizeof(str), stdin);
+
+    toUpperCase(str, 0);
+
+    printf("String in uppercase: %s", str);
+
+    return 0;
+}
