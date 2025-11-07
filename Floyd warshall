@@ -1,0 +1,90 @@
+#include <stdio.h>
+
+#define INF 1000000000  // a large value treated as "infinity"
+#define MAXN 100        // max number of vertices supported
+
+// Reconstruct and print path u -> v using the 'nxt' matrix
+void printPath(int u, int v, int nxt[MAXN][MAXN]) {
+    if (nxt[u][v] == -1) { 
+        printf("No path\n");
+        return;
+    }
+    printf("%d", u);
+    while (u != v) {
+        u = nxt[u][v];
+        printf(" -> %d", u);
+    }
+    printf("\n");
+}
+
+int main() {
+    // ---- Input section (edit these) ----
+    int n = 4; // number of vertices: 0..n-1
+
+    // Adjacency matrix; INF means no edge.
+    // Example graph:
+    // 0 -> 1 (5), 0 -> 3 (10)
+    // 1 -> 2 (3)
+    // 2 -> 3 (1)
+    // 3 -> 0 (2)
+    int w[MAXN][MAXN] = {
+        {0,   5,   INF, 10},
+        {INF, 0,   3,   INF},
+        {INF, INF, 0,   1},
+        {2,   INF, INF, 0}
+    };
+    // ------------------------------------
+
+    int dist[MAXN][MAXN];
+    int nxt[MAXN][MAXN];
+
+    // Initialize dist and nxt
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            dist[i][j] = w[i][j];
+            if (i == j || w[i][j] == INF) nxt[i][j] = -1;
+            else nxt[i][j] = j;
+        }
+    }
+
+    // Floyd–Warshall core: O(n^3)
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            if (dist[i][k] == INF) continue;
+            for (int j = 0; j < n; j++) {
+                if (dist[k][j] == INF) continue;
+                int through_k = dist[i][k] + dist[k][j];
+                if (through_k < dist[i][j]) {
+                    dist[i][j] = through_k;
+                    nxt[i][j] = nxt[i][k]; // first hop on the best i->j path
+                }
+            }
+        }
+    }
+
+    // Detect negative cycles: if dist[i][i] < 0, i is on/affected by a negative cycle
+    int hasNegCycle = 0;
+    for (int i = 0; i < n; i++) {
+        if (dist[i][i] < 0) { hasNegCycle = 1; break; }
+    }
+
+    if (hasNegCycle) {
+        printf("Graph contains a negative cycle affecting shortest paths.\n");
+    }
+
+    // Print distance matrix
+    printf("All-Pairs Shortest Distances:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (dist[i][j] >= INF/2) printf("INF ");
+            else printf("%3d ", dist[i][j]);
+        }
+        printf("\n");
+    }
+
+    // Example: print path from 0 to 3
+    printf("\nPath 0 -> 3: ");
+    printPath(0, 3, nxt);
+
+    return 0;
+}
